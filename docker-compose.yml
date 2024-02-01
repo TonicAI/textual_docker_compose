@@ -1,0 +1,110 @@
+version: '3'
+services:
+  solar-db:
+    image: postgres:16
+    container_name: solar-db
+    restart: unless-stopped
+    ports:
+      - 25432:5432
+    volumes:
+      - ./metadata-db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${SOLAR_DB_USERNAME}
+      POSTGRES_PASSWORD: ${SOLAR_DB_PASSWORD}
+      POSTGRES_DB: ${SOLAR_DB_DATABASE}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  solar-api:
+    image: quay.io/tonicai/solar-api:${SOLAR_VERSION}
+    container_name: solar-api
+    restart: unless-stopped
+    volumes:
+      - "./shared-logs:/usr/bin/solar/logs_public:Z"
+      - "./local-logs:/usr/bin/solar/logs:Z"
+      - "./log-config:/usr/bin/solar/vector_config:Z"
+      - "./certificates:/usr/bin/solar/certificates:ro"
+    env_file:
+      - .env
+    ports:
+      - "443:${SOLAR_PORT_HTTPS:-9001}"
+      - "80:${SOLAR_PORT_HTTP:-9002}"
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/${SOLAR_PORT_HTTP:-9002}'"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    depends_on:
+      solar-db:
+        condition: service_healthy
+  solar-worker:
+    image: quay.io/tonicai/solar-worker:${SOLAR_VERSION}
+    container_name: solar-worker
+    restart: unless-stopped
+    volumes:
+      - "./shared-logs:/usr/bin/solar/logs_public:Z"
+      - "./local-logs:/usr/bin/solar/logs:Z"
+      - "./log-config:/usr/bin/solar/vector_config:Z"
+    env_file:
+      - .env
+    depends_on:
+      solar-db:
+        condition: service_healthy
+      solar-api:
+        condition: service_healthy
+  solar-ml:
+    image: quay.io/tonicai/solar-ml:${SOLAR_VERSION}
+    container_name: solar-ml
+    restart: unless-stopped
+    volumes:
+      - "./shared-logs:/usr/bin/solar/logs_public:Z"
+      - "./local-logs:/usr/bin/solar/logs:Z"
+      - "./log-config:/usr/bin/solar/vector_config:Z"
+      - "./custom-models:/usr/bin/solar/custom_models:Z"
+    env_file:
+      - .env
+    ports:
+      - 7701:7701
+    depends_on:
+      solar-db:
+        condition: service_healthy
+      solar-api:
+        condition: service_healthy
+  log-shipper:
+    image: timberio/vector:latest-debian
+    container_name: log-shipper
+    restart: unless-stopped
+    # same UID as the default Solar UID
+    user: "${SOLAR_UID:-32537}:0"
+    command: ["--config", "/usr/bin/solar/vector_config/vector.toml"]
+    volumes:
+      - "./shared-logs:/usr/bin/solar/logs_public:Z"
+      - "./vector-working:/etc/solar/vector_data:Z"
+      - "./log-config:/usr/bin/solar/vector_config:ro"
+    env_file:
+      - .env
+    environment:
+      LOG_COLLECTION_FOLDER: "/usr/bin/solar/logs_public"
+  # otherwise volumes are owned by root and we cannot use them
+  file-perms:
+    image: debian:12-slim
+    container_name: file-perms
+    volumes:
+      - ./shared-logs:/etc/mounts/logs_public
+      - ./local-logs:/etc/mounts/logs
+      - ./log-config:/etc/mounts/vector_config
+      - ./vector-working:/etc/mounts/vector-working
+      - ./certificates:/etc/mounts/certificates
+    entrypoint: ["chmod"]
+    command: ["-R", "0777", "/etc/mounts"]
+
+volumes:
+  metadata-db:
+  shared-logs:
+  local-logs:
+  log-config:
+  vector-working:
+  custom-models:
+  certificates:
