@@ -1,8 +1,8 @@
 version: '3'
 services:
-  solar-db:
+  textual-db:
     image: postgres:16
-    container_name: solar-db
+    container_name: textual-db
     restart: unless-stopped
     ports:
       - 25432:5432
@@ -17,15 +17,15 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  solar-api:
-    image: quay.io/tonicai/solar-api:${SOLAR_VERSION}
-    container_name: solar-api
+  textual-api:
+    image: quay.io/tonicai/textual-api:${SOLAR_VERSION}
+    container_name: textual-api
     restart: unless-stopped
     volumes:
-      - "./shared-logs:/usr/bin/solar/logs_public:Z"
-      - "./local-logs:/usr/bin/solar/logs:Z"
-      - "./log-config:/usr/bin/solar/vector_config:Z"
-      - "./certificates:/usr/bin/solar/certificates:ro"
+      - "./shared-logs:/usr/bin/textual/logs_public:Z"
+      - "./local-logs:/usr/bin/textual/logs:Z"
+      - "./log-config:/usr/bin/textual/vector_config:Z"
+      - "./certificates:/usr/bin/textual/certificates:ro"
     env_file:
       - .env
     ports:
@@ -37,26 +37,26 @@ services:
       timeout: 30s
       retries: 3
     depends_on:
-      solar-db:
+      textual-db:
         condition: service_healthy
-  solar-worker:
-    image: quay.io/tonicai/solar-worker:${SOLAR_VERSION}
-    container_name: solar-worker
+  textual-worker:
+    image: quay.io/tonicai/textual-worker:${SOLAR_VERSION}
+    container_name: textual-worker
     restart: unless-stopped
     volumes:
-      - "./shared-logs:/usr/bin/solar/logs_public:Z"
-      - "./local-logs:/usr/bin/solar/logs:Z"
-      - "./log-config:/usr/bin/solar/vector_config:Z"
+      - "./shared-logs:/usr/bin/textual/logs_public:Z"
+      - "./local-logs:/usr/bin/textual/logs:Z"
+      - "./log-config:/usr/bin/textual/vector_config:Z"
     env_file:
       - .env
     depends_on:
-      solar-db:
+      textual-db:
         condition: service_healthy
-      solar-api:
+      textual-api:
         condition: service_healthy
-  solar-ml:
-    image: quay.io/tonicai/solar-ml-gpu:${SOLAR_VERSION}
-    container_name: solar-ml
+  textual-ml:
+    image: quay.io/tonicai/textual-ml-gpu:${SOLAR_VERSION}
+    container_name: textual-ml
     restart: unless-stopped
     deploy:
        resources:
@@ -66,19 +66,19 @@ services:
              count: 1
              capabilities: [ gpu ]
     volumes:
-      - "./shared-logs:/usr/bin/solar/logs_public:Z"
-      - "./local-logs:/usr/bin/solar/logs:Z"
-      - "./log-config:/usr/bin/solar/vector_config:Z"
-      - "./custom-models:/usr/bin/solar/custom_models:Z"
+      - "./shared-logs:/usr/bin/textual/logs_public:Z"
+      - "./local-logs:/usr/bin/textual/logs:Z"
+      - "./log-config:/usr/bin/textual/vector_config:Z"
+      - "./custom-models:/usr/bin/textual/custom_models:Z"
     environment:
       SUPERVISOR_CONF: /etc/supervisor/conf.d/supervisord_api.conf
     env_file:
       - .env
     depends_on:
-      - "solar_db"
-  solar-ml-worker:
-    image: quay.io/tonicai/solar-ml-gpu:${SOLAR_VERSION}
-    container_name: solar-ml-worker
+      - "textual-db"
+  textual-ml-worker:
+    image: quay.io/tonicai/textual-ml-gpu:${SOLAR_VERSION}
+    container_name: textual-ml-worker
     restart: unless-stopped
     deploy:
       resources:
@@ -88,18 +88,18 @@ services:
               count: 1
               capabilities: [ gpu ]
     volumes:
-      - "./shared-logs:/usr/bin/solar/logs_public:Z"
-      - "./local-logs:/usr/bin/solar/logs:Z"
-      - "./log-config:/usr/bin/solar/vector_config:Z"
-      - "./custom-models:/usr/bin/solar/custom_models:Z"
+      - "./shared-logs:/usr/bin/textual/logs_public:Z"
+      - "./local-logs:/usr/bin/textual/logs:Z"
+      - "./log-config:/usr/bin/textual/vector_config:Z"
+      - "./custom-models:/usr/bin/textual/custom_models:Z"
     environment:
       SUPERVISOR_CONF: /etc/supervisor/conf.d/supervisord_worker.conf
     env_file:
       - .env
     depends_on:
-      solar_db:
+      textual-db:
         condition: service_healthy
-      solar-api:
+      textual-api:
         condition: service_healthy
   log-shipper:
     image: timberio/vector:latest-debian
@@ -107,15 +107,15 @@ services:
     restart: unless-stopped
     # same UID as the default Solar UID
     user: "${SOLAR_UID:-32537}:0"
-    command: ["--config", "/usr/bin/solar/vector_config/vector.toml"]
+    command: ["--config", "/usr/bin/textual/vector_config/vector.toml"]
     volumes:
-      - "./shared-logs:/usr/bin/solar/logs_public:Z"
-      - "./vector-working:/etc/solar/vector_data:Z"
-      - "./log-config:/usr/bin/solar/vector_config:ro"
+      - "./shared-logs:/usr/bin/textual/logs_public:Z"
+      - "./vector-working:/etc/textual/vector_data:Z"
+      - "./log-config:/usr/bin/textual/vector_config:ro"
     env_file:
       - .env
     environment:
-      LOG_COLLECTION_FOLDER: "/usr/bin/solar/logs_public"
+      LOG_COLLECTION_FOLDER: "/usr/bin/textual/logs_public"
   # otherwise volumes are owned by root and we cannot use them
   file-perms:
     image: debian:12-slim
