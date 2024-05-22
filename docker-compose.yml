@@ -26,6 +26,7 @@ services:
       - "./local-logs:/usr/bin/textual/logs:Z"
       - "./log-config:/usr/bin/textual/vector_config:Z"
       - "./certificates:/usr/bin/textual/certificates:ro"
+      - "./.dotnet:/.dotnet:Z"
     env_file:
       - .env
     ports:
@@ -47,6 +48,7 @@ services:
       - "./shared-logs:/usr/bin/textual/logs_public:Z"
       - "./local-logs:/usr/bin/textual/logs:Z"
       - "./log-config:/usr/bin/textual/vector_config:Z"
+      - "./.dotnet:/.dotnet:Z"
     env_file:
       - .env
     depends_on:
