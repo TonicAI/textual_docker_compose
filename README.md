@@ -11,6 +11,7 @@ ENVIRONMENT_NAME
 SOLAR_DB_PASSWORD= #<FILL IN>
 SOLAR_SECRET= #<FILL IN>
 SOLAR_STATISTICS_SEED= #<FILL IN>
+SOLAR_LICENSE= #<FILL IN>
 ```bash
 
 Everything else is optional. Reach out to support@tonic.ai with any questions.
