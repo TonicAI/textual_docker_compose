@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: ${SOLAR_DB_PASSWORD}
       POSTGRES_DB: ${SOLAR_DB_DATABASE}
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      test: [ "CMD", "pg_isready", "-U", "${SOLAR_DB_USERNAME}" ]
       interval: 10s
       timeout: 5s
       retries: 5
