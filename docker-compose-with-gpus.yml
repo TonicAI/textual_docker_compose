@@ -76,31 +76,6 @@ services:
       - .env
     depends_on:
       - "textual-db"
-  textual-ml-worker:
-    image: quay.io/tonicai/textual-ml-gpu:${SOLAR_VERSION}
-    container_name: textual-ml-worker
-    restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [ gpu ]
-    volumes:
-      - "./shared-logs:/usr/bin/textual/logs_public:Z"
-      - "./local-logs:/usr/bin/textual/logs:Z"
-      - "./log-config:/usr/bin/textual/vector_config:Z"
-      - "./custom-models:/usr/bin/textual/custom_models:Z"
-    environment:
-      SUPERVISOR_CONF: /etc/supervisor/conf.d/supervisord_worker.conf
-    env_file:
-      - .env
-    depends_on:
-      textual-db:
-        condition: service_healthy
-      textual-api:
-        condition: service_healthy
   log-shipper:
     image: timberio/vector:latest-debian
     container_name: log-shipper
