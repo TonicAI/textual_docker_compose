@@ -27,6 +27,7 @@ services:
       - "./log-config:/usr/bin/textual/vector_config:Z"
       - "./certificates:/usr/bin/textual/certificates:ro"
       - "./.dotnet:/.dotnet:Z"
+      - "./lucene-index:/usr/bin/textual/lucene-index:ro"
     env_file:
       - .env
     ports:
@@ -49,6 +50,7 @@ services:
       - "./local-logs:/usr/bin/textual/logs:Z"
       - "./log-config:/usr/bin/textual/vector_config:Z"
       - "./.dotnet:/.dotnet:Z"
+      - "./lucene-index:/usr/bin/textual/lucene-index:Z"
     env_file:
       - .env
     depends_on:
@@ -99,6 +101,7 @@ services:
       - ./log-config:/etc/mounts/vector_config
       - ./vector-working:/etc/mounts/vector-working
       - ./certificates:/etc/mounts/certificates
+      - ./lucene-index:/etc/mounts/lucene-index
     entrypoint: ["chmod"]
     command: ["-R", "0777", "/etc/mounts"]
 
@@ -110,3 +113,4 @@ volumes:
   vector-working:
   custom-models:
   certificates:
+  lucene-index:
