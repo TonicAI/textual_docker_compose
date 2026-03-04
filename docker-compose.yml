@@ -74,6 +74,39 @@ services:
         condition: service_healthy
       textual-api:
         condition: service_healthy
+  textual-roberta:
+    image: quay.io/tonicai/textual-roberta:${SOLAR_VERSION}
+    container_name: textual-roberta
+    restart: unless-stopped
+    volumes:
+      - "./shared-logs:/usr/bin/textual/logs_public:Z"
+      - "./local-logs:/usr/bin/textual/logs:Z"
+      - "./log-config:/usr/bin/textual/vector_config:Z"
+      - "./custom-models:/usr/bin/textual/custom_models:Z"
+    env_file:
+      - .env
+    ports:
+      - 8801:8801
+    depends_on:
+      textual-db:
+        condition: service_healthy
+      textual-api:
+        condition: service_healthy
+  # textual-asr:
+  #   image: quay.io/tonicai/textual-asr:${SOLAR_VERSION}
+  #   container_name: textual-asr
+  #   restart: unless-stopped
+  #   volumes:
+  #     - "./shared-logs:/usr/bin/textual/logs_public:Z"
+  #     - "./local-logs:/usr/bin/textual/logs:Z"
+  #     - "./log-config:/usr/bin/textual/vector_config:Z"
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - 7703:7703
+  #   depends_on:
+  #     textual-api:
+  #       condition: service_healthy
   log-shipper:
     image: timberio/vector:latest-debian
     container_name: log-shipper
@@ -99,6 +132,7 @@ services:
       - ./log-config:/etc/mounts/vector_config
       - ./vector-working:/etc/mounts/vector-working
       - ./certificates:/etc/mounts/certificates
+      - ./custom-models:/etc/mounts/custom_models
     entrypoint: ["chmod"]
     command: ["-R", "0777", "/etc/mounts"]
 
