@@ -15,3 +15,12 @@ SOLAR_LICENSE= #<FILL IN>
 ```bash
 
 Everything else is optional. Reach out to support@tonic.ai with any questions.
+
+## Analytics
+
+Release images do not include Amplitude credentials. To enable analytics, set
+`AMPLITUDE_API_KEY` and `ANALYTIC_BACKEND_SALT` in `.env`.
+
+Docker Compose passes these values to the `textual-api` and `textual-worker`
+containers. They are intentionally not passed to ML, Roberta, ASR, log shipper,
+database, or setup helper containers.

@@ -60,6 +60,9 @@ services:
     image: quay.io/tonicai/textual-ml:${SOLAR_VERSION}
     container_name: textual-ml
     restart: unless-stopped
+    environment:
+      AMPLITUDE_API_KEY: ""
+      ANALYTIC_BACKEND_SALT: ""
     volumes:
       - "./shared-logs:/usr/bin/textual/logs_public:Z"
       - "./local-logs:/usr/bin/textual/logs:Z"
@@ -78,6 +81,9 @@ services:
     image: quay.io/tonicai/textual-roberta:${SOLAR_VERSION}
     container_name: textual-roberta
     restart: unless-stopped
+    environment:
+      AMPLITUDE_API_KEY: ""
+      ANALYTIC_BACKEND_SALT: ""
     volumes:
       - "./shared-logs:/usr/bin/textual/logs_public:Z"
       - "./local-logs:/usr/bin/textual/logs:Z"
@@ -96,6 +102,9 @@ services:
   #   image: quay.io/tonicai/textual-asr:${SOLAR_VERSION}
   #   container_name: textual-asr
   #   restart: unless-stopped
+  #   environment:
+  #     AMPLITUDE_API_KEY: ""
+  #     ANALYTIC_BACKEND_SALT: ""
   #   volumes:
   #     - "./shared-logs:/usr/bin/textual/logs_public:Z"
   #     - "./local-logs:/usr/bin/textual/logs:Z"
@@ -121,6 +130,8 @@ services:
     env_file:
       - .env
     environment:
+      AMPLITUDE_API_KEY: ""
+      ANALYTIC_BACKEND_SALT: ""
       LOG_COLLECTION_FOLDER: "/usr/bin/textual/logs_public"
   # otherwise volumes are owned by root and we cannot use them
   file-perms:
