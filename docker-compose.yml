@@ -113,7 +113,7 @@ services:
     restart: unless-stopped
     # same UID as the default Solar UID
     user: "${SOLAR_UID:-32537}:0"
-    command: ["--config", "/usr/bin/textual/vector_config/vector.toml"]
+    command: ["--config", "/usr/bin/textual/vector_config/vector.toml", "--watch-config"]
     volumes:
       - "./shared-logs:/usr/bin/textual/logs_public:Z"
       - "./vector-working:/etc/textual/vector_data:Z"
@@ -122,6 +122,9 @@ services:
       - .env
     environment:
       LOG_COLLECTION_FOLDER: "/usr/bin/textual/logs_public"
+    depends_on:
+      textual-api:
+        condition: service_healthy
   # otherwise volumes are owned by root and we cannot use them
   file-perms:
     image: debian:12-slim
