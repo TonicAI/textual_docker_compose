@@ -71,6 +71,8 @@ services:
       - "./log-config:/usr/bin/textual/vector_config:Z"
       - "./custom-models:/usr/bin/textual/custom_models:Z"
     environment:
+      AMPLITUDE_API_KEY: ""
+      ANALYTIC_BACKEND_SALT: ""
       SUPERVISOR_CONF: /etc/supervisor/conf.d/supervisord_api.conf
     env_file:
       - .env
@@ -92,6 +94,9 @@ services:
       - "./local-logs:/usr/bin/textual/logs:Z"
       - "./log-config:/usr/bin/textual/vector_config:Z"
       - "./custom-models:/usr/bin/textual/custom_models:Z"
+    environment:
+      AMPLITUDE_API_KEY: ""
+      ANALYTIC_BACKEND_SALT: ""
     env_file:
       - .env
     ports:
@@ -105,6 +110,9 @@ services:
   #   image: quay.io/tonicai/textual-asr:${SOLAR_VERSION}
   #   container_name: textual-asr
   #   restart: unless-stopped
+  #   environment:
+  #     AMPLITUDE_API_KEY: ""
+  #     ANALYTIC_BACKEND_SALT: ""
   #   volumes:
   #     - "./shared-logs:/usr/bin/textual/logs_public:Z"
   #     - "./local-logs:/usr/bin/textual/logs:Z"
@@ -130,6 +138,8 @@ services:
     env_file:
       - .env
     environment:
+      AMPLITUDE_API_KEY: ""
+      ANALYTIC_BACKEND_SALT: ""
       LOG_COLLECTION_FOLDER: "/usr/bin/textual/logs_public"
     depends_on:
       textual-api:
