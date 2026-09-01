@@ -55,16 +55,9 @@ services:
       textual-api:
         condition: service_healthy
   textual-ml:
-    image: quay.io/tonicai/textual-ml-gpu:${SOLAR_VERSION}
+    image: quay.io/tonicai/textual-ml:${SOLAR_VERSION}
     container_name: textual-ml
     restart: unless-stopped
-    deploy:
-       resources:
-         reservations:
-           devices:
-           - driver: nvidia
-             count: 1
-             capabilities: [ gpu ]
     volumes:
       - "./shared-logs:/usr/bin/textual/logs_public:Z"
       - "./local-logs:/usr/bin/textual/logs:Z"
